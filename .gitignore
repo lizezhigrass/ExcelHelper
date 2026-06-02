@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────
+# Excel 快捷查询助手 / Excel Search Helper — .gitignore
+# ─────────────────────────────────────────────────────────
+
+# ── 用户私有配置（含路径、凭据，不应入库）─────────────────
+# Private config file — contains paths, credentials, hotkey settings
+# config.yaml
+
+# ── 测试生成的二进制文件（可由 test/generate_test_data.py 重建）─
+# Test data binaries — regenerate via: python test/generate_test_data.py
+# test/*.db
+# test/*.xlsx
+
+# ── Python 虚拟环境 ───────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── Python 字节码与缓存 ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ── 打包产物 ─────────────────────────────────────────────
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ── PyInstaller 临时文件 ──────────────────────────────────
+*.spec.bak
+
+# ── IDE / 编辑器配置 ─────────────────────────────────────
+.vscode/
+.idea/
+.mypy_cache/
+.ruff_cache/
+
+# ── 日志与崩溃报告 ───────────────────────────────────────
+*.log
+crash_log.txt
+
+# ── 旧业务专用 spec 文件 ──────────────────────────────────
+/计划跟踪软件.spec

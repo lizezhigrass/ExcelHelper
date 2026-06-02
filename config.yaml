@@ -1,0 +1,297 @@
+global:
+  hotkey_enabled: true
+  show_notifications: true
+  language: auto
+query_modules:
+  demo_excel_source:
+    type: excel_file
+    enabled: true
+    name: Excel Spare Parts Database
+    has_header: true
+    sheet: 备件库
+    max_rows: 50000
+    sources:
+    - type: file
+      path: test/test_inventory.xlsx
+    columns:
+    - col: A
+      field: material_code
+    - col: B
+      field: material_name
+    - col: C
+      field: spec
+    - col: D
+      field: unit
+    - col: E
+      field: stock
+    - col: F
+      field: price
+    - col: G
+      field: factory_batch
+  demo_sqlite_source:
+    type: sql_table
+    enabled: true
+    name: SQLite Materials Database
+    db_type: sqlite
+    db_path: test/test_database.db
+    table: materials
+    search_fields:
+    - material_code
+    - material_name
+    - spec
+    return_fields:
+    - material_code
+    - material_name
+    - spec
+    - unit
+    - stock
+    - price
+    - factory_batch
+    match_mode: ilike
+    timeout: 15
+  demo_vector_source:
+    type: qdrant_vector
+    enabled: false
+    name: Semantic Vector Search
+    host: 127.0.0.1
+    port: 6333
+    collection: materials
+    embedding_url: http://127.0.0.1:8000/embed
+    top_k: 20
+interaction_modules:
+  materials_search_panel:
+    name: Materials Query UI
+    base_type: display_panel
+    components:
+    - label: Material Code
+      comp_type: text
+      field: material_code
+      options: []
+      default: ''
+    - label: Material Name
+      comp_type: text
+      field: material_name
+      options: []
+      default: ''
+    - label: Specification
+      comp_type: text
+      field: spec
+      options: []
+      default: ''
+    - label: Price
+      comp_type: number_text
+      field: price
+      options: []
+      default: ''
+  demo_auto_fill_ui:
+    name: Batch Auto-Fill Processor
+    base_type: auto_fill
+    auto_close_seconds: 5
+mapping_groups:
+  excel_demo_mapping:
+    name: Excel Parts Mapping Group
+    interaction_module: materials_search_panel
+    query_module: demo_excel_source
+    input_mappings:
+    - query_field: material_code
+      columns: []
+      separator: ' '
+      ui_component: material_code
+      default_value: ''
+    - query_field: material_name
+      columns:
+      - B
+      separator: ' '
+      ui_component: material_name
+      default_value: ''
+    - query_field: spec
+      columns:
+      - C
+      separator: ' '
+      ui_component: spec
+      default_value: ''
+    - query_field: price
+      columns: []
+      separator: ' '
+      ui_component: price
+      default_value: ''
+    output_mappings:
+    - result_field: material_code
+      column: H
+    - result_field: material_name
+      column: I
+    - result_field: spec
+      column: J
+    - result_field: unit
+      column: K
+    - result_field: stock
+      column: E
+    - result_field: price
+      column: F
+    - result_field: factory_batch
+      column: G
+    display_columns:
+    - field: material_code
+      header: Material Code
+      width: 120
+    - field: material_name
+      header: Material Name
+      width: 180
+    - field: spec
+      header: Specification
+      width: 140
+    - field: unit
+      header: Unit
+      width: 60
+    - field: stock
+      header: Stock
+      width: 80
+    - field: price
+      header: Price (CNY)
+      width: 100
+    - field: factory_batch
+      header: Factory Batch
+      width: 110
+    query_params:
+      limit: 50
+  sqlite_demo_mapping:
+    name: SQLite Database Mapping Group
+    interaction_module: materials_search_panel
+    query_module: demo_sqlite_source
+    input_mappings:
+    - query_field: material_code
+      columns:
+      - A
+      separator: ' '
+      ui_component: material_code
+      default_value: ''
+    - query_field: ''
+      columns:
+      - B
+      separator: ' '
+      ui_component: material_name
+      default_value: ''
+    - query_field: ''
+      columns:
+      - C
+      separator: ' '
+      ui_component: spec
+      default_value: ''
+    output_mappings:
+    - result_field: material_code
+      column: A
+    - result_field: material_name
+      column: B
+    - result_field: spec
+      column: C
+    - result_field: unit
+      column: D
+    - result_field: stock
+      column: E
+    - result_field: price
+      column: F
+    - result_field: factory_batch
+      column: G
+    display_columns:
+    - field: material_code
+      header: Code
+      width: 120
+    - field: material_name
+      header: Name
+      width: 180
+    - field: spec
+      header: Specification
+      width: 140
+    - field: unit
+      header: Unit
+      width: 60
+    - field: stock
+      header: Stock
+      width: 80
+    - field: price
+      header: Unit Price
+      width: 100
+    - field: factory_batch
+      header: Batch No
+      width: 110
+    query_params:
+      limit: 50
+  sqlite_autofill_mapping:
+    name: SQLite Batch Auto-Fill Group
+    interaction_module: demo_auto_fill_ui
+    query_module: demo_sqlite_source
+    input_mappings:
+    - query_field: material_code
+      columns:
+      - A
+      separator: ' '
+      ui_component: material_code
+      default_value: ''
+    output_mappings:
+    - result_field: material_code
+      column: H
+    - result_field: material_name
+      column: I
+    - result_field: spec
+      column: J
+    - result_field: unit
+      column: K
+    - result_field: stock
+      column: E
+    - result_field: price
+      column: F
+    - result_field: factory_batch
+      column: G
+    display_columns: []
+    query_params:
+      limit: 1
+table_modules:
+  hotkey_excel:
+    hotkey: alt+q
+    mapping_group: excel_demo_mapping
+    enabled: true
+    title: Excel Parts Mapping Group
+  hotkey_sqlite:
+    hotkey: alt+w
+    mapping_group: sqlite_demo_mapping
+    enabled: true
+    title: SQLite Database Mapping Group
+  hotkey_autofill:
+    hotkey: alt+e
+    mapping_group: sqlite_autofill_mapping
+    enabled: true
+    title: SQLite Batch Auto-Fill Group
+window_sizes:
+  display_excel_demo_mapping:
+    width: 1059
+    height: 620
+  display_sqlite_demo_mapping:
+    width: 767
+    height: 620
+column_widths:
+  excel_demo_mapping:
+    Material Code: 120
+    Material Name: 180
+    Specification: 140
+    Unit: 60
+    Stock: 80
+    Price (CNY): 100
+    Factory Batch: 357
+  sqlite_demo_mapping:
+    Code: 120
+    Name: 180
+    Specification: 140
+    Unit: 60
+    Stock: 80
+    Unit Price: 100
+    Batch No: 368
+splitter_sizes:
+  mapping_splitter:
+  - 387
+  - 388
+  display_excel_demo_mapping:
+  - 357
+  - 99
+  display_sqlite_demo_mapping:
+  - 357
+  - 99

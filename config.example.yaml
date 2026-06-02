@@ -1,0 +1,202 @@
+# ============================================================
+# config.example.yaml — Excel 快捷查询助手 配置示例模板
+# 使用方法：将本文件复制为 config.yaml，然后填入你的实际参数
+# ============================================================
+# config.example.yaml — Excel Search Helper Configuration Template
+# Usage: Copy this file to config.yaml and fill in your actual values
+# ============================================================
+
+global:
+  hotkey_enabled: true           # 是否启用全局快捷键 / Enable global hotkeys
+  show_notifications: true       # 是否显示托盘气泡通知 / Show tray notifications
+  language: en                   # auto | zh | en
+
+# ============================================================
+# 查询模块 / Query Modules
+# 定义从哪里查数据 / Define your data sources
+# ============================================================
+query_modules:
+
+  # ── 示例 1：Excel 文件数据源 ────────────────────────────────
+  my_excel_source:
+    type: excel_file
+    enabled: true
+    name: 我的Excel数据源                  # 显示名称（仅用于界面）
+    has_header: true                       # 是否包含表头行
+    sheet: Sheet1                          # 工作表名称或索引（0起）
+    max_rows: 50000                        # 最大读取行数
+    sources:
+    - type: file
+      path: data/my_inventory.xlsx         # 相对于程序目录的路径
+    # - type: directory                    # 也可以指定目录，自动扫描所有xlsx
+    #   path: data/reports/
+    #   recursive: false
+    columns:                               # 列映射（留空则自动读取所有列）
+    - col: A
+      field: material_code                 # 字段名，用于查询和回写
+    - col: B
+      field: material_name
+    - col: C
+      field: spec
+    - col: D
+      field: unit
+    - col: E
+      field: stock
+    - col: F
+      field: price
+
+  # ── 示例 2：SQLite 数据库数据源 ─────────────────────────────
+  my_sqlite_source:
+    type: sql_table
+    enabled: true
+    name: 我的SQLite数据库
+    db_type: sqlite
+    db_path: data/my_database.db           # 相对路径 / 或绝对路径
+    table: materials                        # 表名
+    search_fields:                          # 支持模糊检索的字段
+    - material_code
+    - material_name
+    - spec
+    return_fields:                          # 查询结果返回的字段
+    - material_code
+    - material_name
+    - spec
+    - unit
+    - stock
+    - price
+    match_mode: ilike                       # ilike（模糊）| exact（精确）
+    timeout: 15
+
+  # ── 示例 3：PostgreSQL 数据库数据源 ─────────────────────────
+  my_postgres_source:
+    type: sql_table
+    enabled: false                          # 暂时禁用 / Disabled by default
+    name: 我的PostgreSQL数据库
+    db_type: postgresql
+    host: your_db_host                      # ← 替换为你的数据库地址
+    port: 5432
+    database: your_database_name           # ← 替换为数据库名
+    username: your_username                # ← 替换为用户名
+    password: your_password                # ← 替换为密码（建议使用环境变量）
+    table: your_table_name
+    search_fields:
+    - field_a
+    - field_b
+    return_fields:
+    - field_a
+    - field_b
+    - field_c
+    match_mode: ilike
+    timeout: 30
+
+  # ── 示例 4：向量语义检索数据源（Qdrant） ────────────────────
+  my_vector_source:
+    type: qdrant_vector
+    enabled: false                          # 需要安装 requirements-vector.txt
+    name: 语义向量检索
+    host: your_qdrant_host                  # ← Qdrant 服务地址
+    port: 6333
+    api_key: your_qdrant_api_key           # ← API Key（可留空）
+    collection: your_collection_name
+    embedding_url: http://your_embedding_service/embed  # ← 嵌入服务地址
+    top_k: 20
+
+# ============================================================
+# 交互模块 / Interaction Modules
+# 定义查询窗口的外观和输入组件 / Define the query panel UI
+# ============================================================
+interaction_modules:
+
+  # ── 示例 1：自定义显示面板（display_panel）──────────────────
+  my_display_panel:
+    name: 物资查询面板
+    base_type: display_panel               # popup_table | search_panel | display_panel | auto_fill
+    components:
+    - label: 物料代码
+      comp_type: text                      # text | dropdown | checkbox | date_text | number_text
+      field: material_code
+      options: []
+      default: ''
+    - label: 物资名称
+      comp_type: text
+      field: material_name
+      options: []
+      default: ''
+    - label: 单位
+      comp_type: dropdown
+      field: unit
+      options:
+      - 个
+      - 套
+      - 台
+      default: ''
+    - label: 库存范围
+      comp_type: number_text               # 支持范围输入如 "100:500" 或 ":200" 或 "100:"
+      field: stock
+      options: []
+      default: ''
+
+  # ── 示例 2：批量自动填充（auto_fill）────────────────────────
+  my_auto_fill:
+    name: 批量填充
+    base_type: auto_fill
+    auto_close_seconds: 5                  # 完成后自动关闭倒计时（秒）
+
+# ============================================================
+# 映射组 / Mapping Groups
+# 定义 Excel 列 ↔ 查询字段的对应关系 / Define column-field mappings
+# ============================================================
+mapping_groups:
+
+  my_mapping_group:
+    name: 物资查询映射组
+    interaction_module: my_display_panel   # 引用交互模块 ID
+    query_module: my_excel_source          # 引用查询模块 ID
+    input_mappings:
+    - query_field: material_code           # 查询字段名
+      columns:
+      - A                                  # 从 Excel A 列读取值预填
+      separator: ' '
+      ui_component: material_code          # 对应面板中的组件 field
+      default_value: ''
+    - query_field: material_name
+      columns: []                          # 不从 Excel 读取，仅用户手动输入
+      separator: ' '
+      ui_component: material_name
+      default_value: ''
+    output_mappings:                       # 双击回写：结果字段 → 写入 Excel 哪列
+    - result_field: material_code
+      column: A
+    - result_field: material_name
+      column: B
+    - result_field: spec
+      column: C
+    - result_field: price
+      column: F
+    display_columns:                       # 弹窗中显示哪些列
+    - field: material_code
+      header: 物料代码
+      width: 120
+    - field: material_name
+      header: 物资名称
+      width: 200
+    - field: spec
+      header: 规格型号
+      width: 160
+    - field: price
+      header: 单价
+      width: 80
+    query_params:
+      limit: 20                            # 最大返回条数
+
+# ============================================================
+# 快捷键绑定 / Hotkey Bindings
+# 将映射组绑定到全局快捷键 / Bind mapping groups to hotkeys
+# ============================================================
+table_modules:
+
+  my_hotkey_1:
+    hotkey: alt+q                          # 快捷键组合（alt/ctrl/shift + 字母/数字）
+    mapping_group: my_mapping_group        # 引用映射组 ID
+    enabled: true
+    title: 物资查询                         # 窗口标题

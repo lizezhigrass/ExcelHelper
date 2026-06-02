@@ -1,0 +1,28 @@
+# Excel 快捷查询助手 核心依赖
+# Core dependencies — sufficient for excel_file and sql_table backends
+# Install: pip install -r requirements-core.txt
+
+# ── UI 框架 ────────────────────────────────────────────────
+PyQt5>=5.15.9,<6.0        # 主 UI 框架（弹窗、托盘、设置窗口等）
+
+# ── 全局快捷键监听 ─────────────────────────────────────────
+pynput>=1.7.6             # 全局快捷键监听（hotkeys/listener.py）
+
+# ── Excel 读写（与活动 Excel 交互） ────────────────────────
+xlwings>=0.33.0           # 通过 COM 接口读写活动 Excel（Windows 专用）
+pywin32>=305              # xlwings COM 依赖（Windows 专用）
+
+# ── Excel 文件查询引擎（二选一，自动降级） ──────────────────
+python-calamine>=0.5.0    # 主引擎：Rust 实现，10-30x 速度，推荐安装
+openpyxl>=3.1.0           # 降级兜底：calamine 不可用时自动切换
+
+# ── 配置文件解析 ───────────────────────────────────────────
+PyYAML>=6.0
+
+# ── 数据库（可选：仅 sql_table 后端需要） ──────────────────
+# SQLite 支持已内置于 Python 标准库，无需额外安装
+# PostgreSQL 支持（如需 sql_table + postgresql）：
+# psycopg2-binary>=2.9.0
+
+# ── HTTP 客户端（可选：仅 vector_api 后端需要） ────────────
+# requests>=2.28.0

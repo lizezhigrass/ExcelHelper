@@ -1,0 +1,56 @@
+# excel_helper/requirements.txt
+# Excel 快捷查询助手依赖
+# 安装：pip install -r requirements.txt
+#
+# ── UI 框架 ───────────────────────────────────────────────────────
+PyQt5==5.15.11              # 主 UI 框架（弹窗、托盘、设置窗口等）
+PyQt5-Qt5==5.15.2
+PyQt5_sip==12.18.0
+
+# ── 快捷键监听 ────────────────────────────────────────────────────
+pynput==1.8.2               # 全局快捷键监听（hotkeys/listener.py）
+
+# ── Excel 读写 ────────────────────────────────────────────────────
+xlwings==0.36.0             # 通过 COM 接口读写活动 Excel（core/excel_ops.py）
+pywin32==311                # xlwings 在 Windows 上的 COM 依赖
+
+# Excel 文件查询引擎（core/query_backends/excel_file_query.py，二选一自动切换）
+python-calamine==0.6.2      # 主引擎：Rust 实现，速度是 openpyxl 的 10-30 倍，支持 .xlsx/.xlsm/.xls/.ods
+openpyxl==3.1.5             # 降级兜底：calamine 不可用时自动切换，支持 .xlsx/.xlsm
+et_xmlfile==2.0.0           # openpyxl 依赖
+
+# ── 配置 ─────────────────────────────────────────────────────────
+PyYAML==6.0.3               # config.yaml 解析（core/mapping.py）
+
+# ── HTTP 客户端 ───────────────────────────────────────────────────
+requests==2.34.2            # 调用 web_query REST API（vector_query.py, pg_material_query.py）
+certifi==2026.5.20
+charset-normalizer==3.4.7
+idna==3.17
+urllib3==2.7.0
+six==1.17.0
+
+# ── 关系型数据库 ──────────────────────────────────────────────────
+# core/query_backends/pg_plan_query.py 和 pg_spare_parts_query.py
+# 直连 PostgreSQL，绕过 web_query 服务
+psycopg2-binary==2.9.12     # PostgreSQL 驱动（pg_plan / pg_spare_parts 后端）
+
+# ── 向量数据库 ────────────────────────────────────────────────────
+# core/query_backends/qdrant_vector_query.py 直连 Qdrant + BGE-M3 嵌入服务
+qdrant-client==1.18.0       # Qdrant 官方客户端（HTTP / gRPC）
+grpcio==1.80.0              # gRPC 通信（prefer_grpc=True 时使用，端口 6334）
+httpx==0.28.1               # qdrant-client HTTP 传输层
+httpcore==1.0.9
+h11==0.16.0
+h2==4.3.0                   # HTTP/2 支持
+hpack==4.1.0
+hyperframe==6.1.0
+numpy==2.4.6                # 向量数组支持
+protobuf==7.35.0            # gRPC 协议序列化
+pydantic==2.13.4            # qdrant-client 数据模型验证
+pydantic_core==2.46.4
+annotated-types==0.7.0
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+anyio==4.13.0
+portalocker==3.2.0
